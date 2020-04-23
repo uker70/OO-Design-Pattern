@@ -12,7 +12,7 @@ namespace OO_Design_Pattern
         {
             private Product()
             {
-
+                
             }
         }
     }
