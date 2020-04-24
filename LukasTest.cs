@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace OO_Design_Pattern
 {
-    class Program
+    class LukasTest
     {
-        static void Main(string[] args)
-        {
-            string kenneth = "Best boi";
-        }
+        string hey = "hey";
     }
 }
