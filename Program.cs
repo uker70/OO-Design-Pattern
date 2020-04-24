@@ -10,6 +10,7 @@ namespace OO_Design_Pattern
     {
         static void Main(string[] args)
         {
+            string kenneth = "Best boi";
         }
     }
 }
