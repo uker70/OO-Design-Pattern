@@ -8,5 +8,6 @@ namespace OO_Design_Pattern
 {
     class LukasTest
     {
+        string hey = "hey";
     }
 }
