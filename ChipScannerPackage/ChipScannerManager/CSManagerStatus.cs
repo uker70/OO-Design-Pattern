@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OO_Design_Pattern
+namespace OO_Design_Pattern.ChipScannerPackage.ChipScannerManager
 {
-    class LukasTest
+    class CSManagerStatus
     {
-        string hey = "hey";
+        //public enum 
     }
 }

@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Windows.Devices.SmartCards;
 using Windows.Devices.Enumeration;
+using Windows.Devices.SmartCards;
 using Windows.Security.Cryptography;
 using Windows.Storage.Streams;
 using WindowsInput;
@@ -13,34 +15,75 @@ using WindowsInput.Native;
 
 namespace OO_Design_Pattern
 {
-    class Program
+    class SmartCardReaderFinder
     {
-        static void Main(string[] args)
+        /*public static async void GetSmartCardReader()
         {
-            /*SmartCardReader reader = GetSmartCardReader().Result;
-            Console.WriteLine(reader.Kind);
-            reader.CardAdded += CardAdded;*/
-            
+            while (true == true)
+            {
+                DeviceInformationCollection devices = await DeviceInformation.FindAllAsync
+                    (SmartCardReader.GetDeviceSelector());
 
-            Thread findSmartCardReaders = new Thread(SmartCardReaderFinder.ScanSmartCard);
-            findSmartCardReaders.Start();
+                if (devices.Count > 0)
+                {
+                    List<SmartCardReader> readers = new List<SmartCardReader>();
+
+                    foreach (DeviceInformation device in devices)
+                    {
+                        readers.Add(await SmartCardReader.FromIdAsync(device.Id));
+                    }
+
+                    Thread scanSmartCard = new Thread(new ParameterizedThreadStart(ScanSmartCard));
+                    scanSmartCard.Start(readers);
+                    Console.WriteLine("Card Reader Ready");
+                    Thread.CurrentThread.Abort();
+                }
+
+                Thread.Sleep(2000);
+            }
+        }*/
 
 
+        public static void ScanSmartCard()
+        {
+            List<SmartCardReader> readers = new List<SmartCardReader>();
 
-            Console.ReadKey(false);
+            DeviceWatcher smartCardReaderWatcher = DeviceInformation.CreateWatcher();
 
+            smartCardReaderWatcher.Added += async (sender, args) =>
+            {
+                DeviceInformationCollection devices =
+                    await DeviceInformation.FindAllAsync(SmartCardReader.GetDeviceSelector());
 
+                foreach (DeviceInformation device in devices)
+                {
+                    if (device.Id == args.Id)
+                    {
+                        readers.Add(await SmartCardReader.FromIdAsync(args.Id));
+                        readers[readers.Count - 1].CardAdded += GetCardID;
+                        Console.WriteLine("{0} is running and ready", readers[readers.Count - 1].Name); //can be changed to output in a popup
+                    }
+                }
+            };
+
+            smartCardReaderWatcher.Removed += (sender, args) =>
+            {
+                
+                for (int idCounter = 0; idCounter < readers.Count; idCounter++)
+                {
+                    if (readers[idCounter].DeviceId == args.Id)
+                    {
+                        readers[idCounter].CardAdded -= GetCardID;
+                        Console.WriteLine("{0} has been removed", readers[idCounter].Name); //can be changed to output in a popup
+                        readers.RemoveAt(idCounter);
+                        break;
+                    }
+                }
+            };
+            smartCardReaderWatcher.Start();
         }
 
-        public static async Task<SmartCardReader> GetSmartCardReader()
-        {
-            DeviceInformationCollection devices = await DeviceInformation.FindAllAsync
-                (SmartCardReader.GetDeviceSelector());
-
-            return await SmartCardReader.FromIdAsync(devices[0].Id);
-        }
-
-        private static void CardAdded(SmartCardReader sender, CardAddedEventArgs args)
+        private static void GetCardID(SmartCardReader sender, CardAddedEventArgs args)
         {
             byte[] byteCardID = Get7ByteCardID(args).Result;
 
